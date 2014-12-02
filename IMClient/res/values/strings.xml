@@ -1,0 +1,18 @@
+<resources>
+
+    <string name="app_name">voice_rcd</string>
+    <string name="hello_world">Hello world!</string>
+    
+    <string name="title_activity_main">MainActivity</string>
+    
+    <!-- SettingActivity -->
+    <string name="hint_ip">server ip:</string>
+    <string name="hint_port">server port:</string>
+    <string name="setting_server">server setting</string>
+    <string name="commit">commit</string>
+    
+    <!-- menu -->
+    <string name="menu_settings">setting server</string>
+    <string name="menu_connect">connect server</string>
+    
+</resources>
