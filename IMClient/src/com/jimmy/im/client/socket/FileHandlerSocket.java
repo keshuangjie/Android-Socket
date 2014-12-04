@@ -29,8 +29,9 @@ import de.greenrobot.event.EventBus;
  * @date 2014-12-1 下午7:31:25
  * @package com.jimmy.im.client.socket
  * @version 1.0
- * 文件发送接收处理
+ * 文件发送接收处理  只能单通道通信
  */
+@Deprecated
 public class FileHandlerSocket extends Thread {
 	private static final String TAG = FileHandlerSocket.class.getSimpleName();
 	

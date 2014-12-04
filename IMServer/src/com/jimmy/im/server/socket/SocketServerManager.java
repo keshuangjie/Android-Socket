@@ -48,13 +48,9 @@ public class SocketServerManager implements Runnable {
 				log("run() -> craete client success "  + num);
 				ToastUtil.getInstance().toast("client connet " + num);
 				
-				if(num%3 == 1){
-					new TextHandlerSocket(client).start();
-				}else if(num%3 == 2){
-					new FileHandlerSocket(client, FileHandlerSocket.TYPE_SEND).start();
-				}else{
-					new FileHandlerSocket(client, FileHandlerSocket.TYPE_RECEIVE).start();
-				}
+				new MsgReceiveHandler(client).start();
+				new MsgSendHandler(client).start();
+				
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -29,6 +29,7 @@ import android.widget.Toast;
 
 import com.jimmy.im.client.adapte.ChatMsgViewAdapter;
 import com.jimmy.im.client.data.MsgEntity;
+import com.jimmy.im.client.data.MsgQueueManager;
 import com.jimmy.im.client.data.TextMsgEntity;
 import com.jimmy.im.client.data.VoiceMsgEntity;
 import com.jimmy.im.client.media.MediaRecord;
@@ -152,7 +153,8 @@ public class MainActivity extends Activity implements OnClickListener {
 					msg.obj = entity;
 					mHandler.sendMessage(msg);
 
-					EventBus.getDefault().postSticky(entity);
+//					EventBus.getDefault().postSticky(entity);
+					MsgQueueManager.getInstance().push(entity);
 
 					break;
 
@@ -217,7 +219,9 @@ public class MainActivity extends Activity implements OnClickListener {
 			msg.obj = entity;
 			mHandler.sendMessage(msg);
 
-			EventBus.getDefault().postSticky(entity);
+//			EventBus.getDefault().postSticky(entity);
+			
+			MsgQueueManager.getInstance().push(entity);
 
 			mEditTextContent.setText("");
 		}
@@ -247,21 +251,21 @@ public class MainActivity extends Activity implements OnClickListener {
 	}
 
 	private void connectServer() {
-		SocketManager.getInstance().startTextHandlerSocket();
+		SocketManager.getInstance().startSocket("");
 
-		mHandler.postDelayed(new Runnable() {
-
-			public void run() {
-				SocketManager.getInstance().startFileSendSocket();
-			}
-		}, 2000);
-
-		mHandler.postDelayed(new Runnable() {
-
-			public void run() {
-				SocketManager.getInstance().startFileReceivelerSocket();
-			}
-		}, 2000);
+//		mHandler.postDelayed(new Runnable() {
+//
+//			public void run() {
+//				SocketManager.getInstance().startFileSendSocket();
+//			}
+//		}, 2000);
+//
+//		mHandler.postDelayed(new Runnable() {
+//
+//			public void run() {
+//				SocketManager.getInstance().startFileReceivelerSocket();
+//			}
+//		}, 2000);
 	}
 
 	@Override

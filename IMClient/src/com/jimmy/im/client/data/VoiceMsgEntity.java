@@ -19,7 +19,4 @@ public class VoiceMsgEntity extends MsgEntity{
     /** 文件时长，以秒为单位 */
     public int time;
     
-    /** 文件大小 */
-    public long size;
-    
 }

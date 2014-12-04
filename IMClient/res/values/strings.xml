@@ -1,9 +1,7 @@
 <resources>
 
-    <string name="app_name">voice_rcd</string>
+    <string name="app_name">IMClient</string>
     <string name="hello_world">Hello world!</string>
-    
-    <string name="title_activity_main">MainActivity</string>
     
     <!-- SettingActivity -->
     <string name="hint_ip">server ip:</string>

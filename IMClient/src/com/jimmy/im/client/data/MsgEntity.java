@@ -21,5 +21,8 @@ public class MsgEntity {
 
     /** 是否是自己发送 */
     public boolean isSelf;
+    
+    /** 文件大小 */
+    public long size;
 
 }

@@ -9,31 +9,46 @@ import android.os.Environment;
  * @author keshuangjie
  * @date 2014-12-1 下午7:41:28
  * @package com.jimmy.im.client.util
- * @version 1.0
- * 常用工具类
+ * @version 1.0 常用工具类
  */
 public class CommonUtil {
-	
+
 	public static final String PATH_ROOT = "myVoice";
 	public static final String PATH_SEPARATOR = File.separator;
 	public static final String FILE_SUFFIX = ".amr";
-	
-	public static String getAmrFilePath(String name){
+
+	public static String getAmrFilePath(String name) {
 		String path = "";
-		if(isSdcardMounted()){
+		if (isSdcardMounted()) {
 			path = Environment.getExternalStorageDirectory().getAbsolutePath()
 					+ PATH_SEPARATOR + PATH_ROOT + PATH_SEPARATOR + name
 					+ FILE_SUFFIX;
 		}
 		return path;
 	}
-	
-	public static boolean isSdcardMounted(){
-		return Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
+
+	/**
+	 *  创建目录（不存在则创建）
+	 * @param dir
+	 * @return
+	 */
+	public static boolean CreateDir(String dir) {
+		boolean isSuccess = true;
+		File file = new File(dir);
+		if (!file.getParentFile().exists()) {
+			isSuccess = file.getParentFile().mkdirs();
+		}
+		return isSuccess;
 	}
-	
+
+	public static boolean isSdcardMounted() {
+		return Environment.getExternalStorageState().equals(
+				Environment.MEDIA_MOUNTED);
+	}
+
 	/**
 	 * 获取当前时间
+	 * 
 	 * @return
 	 */
 	public static String getDate() {

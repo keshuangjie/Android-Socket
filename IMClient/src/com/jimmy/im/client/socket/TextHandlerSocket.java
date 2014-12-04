@@ -20,8 +20,9 @@ import de.greenrobot.event.EventBus;
  * @date 2014-12-1 下午7:41:03
  * @package com.jimmy.im.client.socket
  * @version 1.0
- * 文本发送接收处理
+ * 文本发送接收处理 不能处理文件发送
  */
+@Deprecated
 public class TextHandlerSocket extends Thread {
 	private static final String TAG = TextHandlerSocket.class.getSimpleName();
 

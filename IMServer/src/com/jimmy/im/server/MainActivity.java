@@ -7,7 +7,6 @@ import java.util.List;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -32,6 +31,7 @@ import android.widget.Toast;
 
 import com.jimmy.im.server.adapter.ChatMsgViewAdapter;
 import com.jimmy.im.server.data.MsgEntity;
+import com.jimmy.im.server.data.MsgQueueManager;
 import com.jimmy.im.server.data.TextMsgEntity;
 import com.jimmy.im.server.data.VoiceMsgEntity;
 import com.jimmy.im.server.media.MediaRecord;
@@ -160,7 +160,8 @@ public class MainActivity extends Activity implements OnClickListener {
 					msg.obj = entity;
 					mHandler.sendMessage(msg);
 					
-					EventBus.getDefault().postSticky(entity);
+//					EventBus.getDefault().postSticky(entity);
+					MsgQueueManager.getInstance().push(entity);
 					
 					break;
 
@@ -226,7 +227,8 @@ public class MainActivity extends Activity implements OnClickListener {
 			msg.obj = entity;
 			mHandler.sendMessage(msg);
 			
-			EventBus.getDefault().postSticky(entity);
+//			EventBus.getDefault().postSticky(entity);
+			MsgQueueManager.getInstance().push(entity);
 
 			mEditTextContent.setText("");
 		}
@@ -282,6 +284,9 @@ public class MainActivity extends Activity implements OnClickListener {
 	 * @param entity
 	 */
 	public void onEvent(MsgEntity entity){
+		
+		Log.i(TAG, "onEvent() -> entity: " + entity);
+		
 		if(entity == null || entity.isSelf){
 			return;
 		}

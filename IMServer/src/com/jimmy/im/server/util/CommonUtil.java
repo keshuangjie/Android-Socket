@@ -34,6 +34,20 @@ public class CommonUtil {
 		return path;
 	}
 	
+	/**
+	 *  创建目录（不存在则创建）
+	 * @param dir
+	 * @return
+	 */
+	public static boolean CreateDir(String dir) {
+		boolean isSuccess = true;
+		File file = new File(dir);
+		if (!file.getParentFile().exists()) {
+			isSuccess = file.getParentFile().mkdirs();
+		}
+		return isSuccess;
+	}
+	
 	public static boolean isSdcardMounted(){
 		return Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
 	}
