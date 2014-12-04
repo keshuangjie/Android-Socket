@@ -48,7 +48,7 @@
         android:layout_marginLeft="15dip"
         android:layout_marginRight="15dip"
         android:background="@drawable/login_edit_normal"
-        android:inputType="number"
+        android:inputType="text"
         android:padding="8dip"
         android:singleLine="true" />
 
