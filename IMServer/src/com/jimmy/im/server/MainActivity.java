@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -35,6 +36,9 @@ import com.jimmy.im.server.data.MsgQueueManager;
 import com.jimmy.im.server.data.TextMsgEntity;
 import com.jimmy.im.server.data.VoiceMsgEntity;
 import com.jimmy.im.server.media.MediaRecord;
+import com.jimmy.im.server.socket.MsgParam;
+import com.jimmy.im.server.socket.MsgRequest;
+import com.jimmy.im.server.socket.RequestQueueManager;
 import com.jimmy.im.server.socket.SocketServerManager;
 import com.jimmy.im.server.util.CommonUtil;
 
@@ -60,7 +64,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private ImageView chatting_mode_btn;
 	private boolean btn_vocie = false;
 	private String voiceName;
-	private long startVoiceT, endVoiceT;
+	private long startVoiceT = -1, endVoiceT = -1;
 	
 	private Handler mHandler = new Handler(){
 		
@@ -136,6 +140,9 @@ public class MainActivity extends Activity implements OnClickListener {
 					break;
 				case MotionEvent.ACTION_UP:
 					Log.i(TAG, "onTouch() -> ACTION_UP");
+					if(TextUtils.isEmpty(voiceName)){
+						return false;
+					}
 					endVoiceT = System.currentTimeMillis();
 //					stop();
 					MediaRecord.getInstance().stop();
@@ -161,8 +168,11 @@ public class MainActivity extends Activity implements OnClickListener {
 					mHandler.sendMessage(msg);
 					
 //					EventBus.getDefault().postSticky(entity);
-					MsgQueueManager.getInstance().push(entity);
+//					MsgQueueManager.getInstance().push(entity);
 					
+					sendMsg(entity);
+					
+					voiceName = "";
 					break;
 
 				default:
@@ -228,10 +238,34 @@ public class MainActivity extends Activity implements OnClickListener {
 			mHandler.sendMessage(msg);
 			
 //			EventBus.getDefault().postSticky(entity);
-			MsgQueueManager.getInstance().push(entity);
+//			MsgQueueManager.getInstance().push(entity);
+			sendMsg(entity);
 
 			mEditTextContent.setText("");
 		}
+	}
+	
+	/**
+	 * 发送消息
+	 * @param entity
+	 */
+	private void sendMsg(MsgEntity entity){
+		MsgParam param = new MsgParam();
+		param.setMsgEntity(entity);
+		MsgRequest request = new MsgRequest(param, new MsgRequest.SendCallback() {
+			
+			public void onFinish() {
+				
+			}
+			
+			public void onError() {
+				
+			}
+		});
+		
+		RequestQueueManager.getInstance().push(request);
+		
+//		MsgQueueManager.getInstance().push(entity);
 	}
 	
 	@Override

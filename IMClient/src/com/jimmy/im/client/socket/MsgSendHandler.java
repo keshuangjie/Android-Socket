@@ -14,9 +14,9 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.jimmy.im.client.data.MsgEntity;
-import com.jimmy.im.client.data.MsgQueueManager;
 import com.jimmy.im.client.data.TextMsgEntity;
 import com.jimmy.im.client.data.VoiceMsgEntity;
+import com.jimmy.im.client.socket.MsgRequest.SendCallback;
 
 public class MsgSendHandler extends Thread {
 
@@ -48,7 +48,13 @@ public class MsgSendHandler extends Thread {
 					e.printStackTrace();
 				}
 				
-				MsgEntity entity = MsgQueueManager.getInstance().poll();
+				MsgRequest request = RequestQueueManager.getInstance().poll();
+				if(request == null){
+					continue;
+				}
+				SendCallback callback = request.getSendCallBack();
+				MsgParam param = request.getMsgParam();
+				MsgEntity entity = param.getMsgEntity();
 				
 				if(entity == null){
 					continue;
@@ -56,10 +62,10 @@ public class MsgSendHandler extends Thread {
 				
 				if(entity instanceof VoiceMsgEntity){
 					//发送语音消息
-					doFileSend((VoiceMsgEntity) entity);
+					doFileSend((VoiceMsgEntity) entity, callback);
 				}else if(entity instanceof TextMsgEntity){
 					//发送文字消息
-					doTextSend((TextMsgEntity) entity);
+					doTextSend((TextMsgEntity) entity, callback);
 				}
 			}
 
@@ -76,7 +82,7 @@ public class MsgSendHandler extends Thread {
 	 * 
 	 * @param dos
 	 */
-	private void doFileSend(VoiceMsgEntity entity) {
+	private void doFileSend(VoiceMsgEntity entity, SendCallback callback) {
 		if (mDataOutputStream == null || entity == null) {
 			return;
 		}
@@ -120,27 +126,27 @@ public class MsgSendHandler extends Thread {
 			}
 			Log.i(TAG, "socket执行完成");
 			mDataOutputStream.flush();
-			// mSocket.shutdownOutput();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				if (reader != null) {
-					reader.close();
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
+			
+			if(callback != null){
+				callback.onFinish();
 			}
-		}
+			
+			reader.close();
+			
+		}  catch (IOException e) {
+//			e.printStackTrace();
+			
+			if(callback != null){
+				callback.onError();
+			}
+		} 
 	}
 	
 	/**
 	 * 发送文本消息
 	 * @param entity
 	 */
-	private void doTextSend(TextMsgEntity entity) {
+	private void doTextSend(TextMsgEntity entity, SendCallback callback) {
 		if (mDataOutputStream == null || entity == null || TextUtils.isEmpty(entity.msgContent)) {
 			return;
 		}
@@ -159,8 +165,17 @@ public class MsgSendHandler extends Thread {
 			
 			mDataOutputStream.write(buffer);
 			mDataOutputStream.flush();
+			
+			if(callback != null){
+				callback.onFinish();
+			}
+			
 		} catch (IOException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
+			
+			if(callback != null){
+				callback.onError();
+			}
 		}
 	}
 

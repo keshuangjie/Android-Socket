@@ -18,6 +18,7 @@ import com.jimmy.im.client.data.MsgEntity;
 import com.jimmy.im.client.data.TextMsgEntity;
 import com.jimmy.im.client.data.VoiceMsgEntity;
 import com.jimmy.im.client.util.CommonUtil;
+import com.jimmy.im.client.util.ToastUtil;
 
 import de.greenrobot.event.EventBus;
 
@@ -56,7 +57,7 @@ public class MsgReceiveHandler extends Thread {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-
+				
 				if (mSocket == null || mDataInputStream == null) {
 					return;
 				}
@@ -112,6 +113,7 @@ public class MsgReceiveHandler extends Thread {
 	 * @param dis
 	 */
 	private void doFileReceive(DataInputStream dis){
+		
 		if (dis == null) {
 			return;
 		}
@@ -148,14 +150,14 @@ public class MsgReceiveHandler extends Thread {
 
 			Log.i(TAG, "run() -> 保存路径：" + entity.filePath);
 			// 创建目录
-			if(!CommonUtil.CreateDir(entity.filePath)){
+			boolean isCreateSuccess = CommonUtil.CreateDir(entity.filePath);
+			if(isCreateSuccess){
+				// 将数据流写到文件中,如果创建目录失败，为了不破坏数据流机构，需要读取但是不写入
+				fo = new BufferedOutputStream(new FileOutputStream(new File(
+						entity.filePath)));
+			}else{
 				Log.e(TAG, "create dir error " + entity.filePath);
-				return;
 			}
-
-			// 2、将数据流写到文件中
-			fo = new BufferedOutputStream(new FileOutputStream(new File(
-					entity.filePath)));
 
 			int bytesRead = 0;
 			byte[] buffer = new byte[2048];
@@ -163,17 +165,21 @@ public class MsgReceiveHandler extends Thread {
 			while ((bytesRead = dis.read(buffer, 0, buffer.length)) != -1) {
 				writeLens += bytesRead;
 				Log.i(TAG, "doReceive() -> 接收文件完成，文件长度：" + writeLens);
-				fo.write(buffer, 0, bytesRead);
+				if(fo != null){
+					fo.write(buffer, 0, bytesRead);
+				}
 				// 如果文件读取完，退出循环，避免阻塞
 				if (writeLens >= entity.size) {
 					break;
 				}
 			}
-			fo.flush();
+			if(fo != null){
+				fo.flush();
+				
+				Log.i(TAG, "doReceive() -> 数据接收完毕");
 
-			Log.i(TAG, "doReceive() -> 数据接收完毕");
-
-			EventBus.getDefault().post(entity);
+				EventBus.getDefault().post(entity);
+			}
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();

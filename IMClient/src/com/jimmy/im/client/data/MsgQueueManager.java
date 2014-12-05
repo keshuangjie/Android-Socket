@@ -9,6 +9,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @version 1.0
  * 待发送消息队列
  */
+@Deprecated
 public class MsgQueueManager {
 	
 	LinkedBlockingQueue<MsgEntity> mQueueList;

@@ -33,10 +33,15 @@ public class CommonUtil {
 	 * @return
 	 */
 	public static boolean CreateDir(String dir) {
-		boolean isSuccess = true;
+		boolean isSuccess = false;
 		File file = new File(dir);
-		if (!file.getParentFile().exists()) {
-			isSuccess = file.getParentFile().mkdirs();
+		File parentFile = file.getParentFile();
+		if (parentFile != null) {
+			if(!parentFile.exists()){
+				isSuccess = file.getParentFile().mkdirs();
+			}else{
+				isSuccess = true;
+			}
 		}
 		return isSuccess;
 	}
