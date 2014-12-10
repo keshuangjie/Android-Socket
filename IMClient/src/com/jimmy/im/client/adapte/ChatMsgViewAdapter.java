@@ -16,7 +16,6 @@ import com.jimmy.im.client.R;
 import com.jimmy.im.client.data.MsgEntity;
 import com.jimmy.im.client.data.TextMsgEntity;
 import com.jimmy.im.client.data.VoiceMsgEntity;
-import com.jimmy.im.client.media.MediaPlay;
 
 /**
  * @author keshuangjie
@@ -31,6 +30,8 @@ public class ChatMsgViewAdapter extends BaseAdapter {
 		int IMVT_COM_MSG = 0;
 		int IMVT_TO_MSG = 1;
 	}
+	
+	private OnPlayListener mListener;
 
 	private List<MsgEntity> mMsgEntitys;
 
@@ -41,8 +42,9 @@ public class ChatMsgViewAdapter extends BaseAdapter {
 		mInflater = LayoutInflater.from(context);
 	}
 
-	public ChatMsgViewAdapter(Context context, List<MsgEntity> entitys) {
+	public ChatMsgViewAdapter(Context context, List<MsgEntity> entitys, OnPlayListener listener) {
 		this.mMsgEntitys = entitys;
+		this.mListener = listener;
 		mInflater = LayoutInflater.from(context);
 	}
 
@@ -122,7 +124,10 @@ public class ChatMsgViewAdapter extends BaseAdapter {
 			
 			public void onClick(View v) {
 				if (entity != null && entity instanceof VoiceMsgEntity) {
-					MediaPlay.getInstance().startPlay(((VoiceMsgEntity)entity).fileName);
+//					MediaPlay.getInstance().startPlay(((VoiceMsgEntity)entity).fileName);
+					if(mListener != null){
+						mListener.onPlay((VoiceMsgEntity) entity);
+					}
 				}
 			}
 		});
@@ -137,6 +142,10 @@ public class ChatMsgViewAdapter extends BaseAdapter {
 		public TextView tvContent;
 		public TextView tvTime;
 		public boolean isSelf;
+	}
+	
+	public interface OnPlayListener{
+		void onPlay(VoiceMsgEntity entity);
 	}
 
 }

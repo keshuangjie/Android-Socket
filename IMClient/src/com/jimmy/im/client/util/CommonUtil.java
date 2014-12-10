@@ -13,7 +13,8 @@ import android.os.Environment;
  */
 public class CommonUtil {
 
-	public static final String PATH_ROOT = "myVoice";
+	public static final String PATH_ROOT = "MyIM";
+	public static final String PATH_VOICE = "voice";
 	public static final String PATH_SEPARATOR = File.separator;
 	public static final String FILE_SUFFIX = ".amr";
 
@@ -21,10 +22,33 @@ public class CommonUtil {
 		String path = "";
 		if (isSdcardMounted()) {
 			path = Environment.getExternalStorageDirectory().getAbsolutePath()
-					+ PATH_SEPARATOR + PATH_ROOT + PATH_SEPARATOR + name
+					+ PATH_SEPARATOR + PATH_ROOT 
+					+ PATH_SEPARATOR + PATH_VOICE
+					+PATH_SEPARATOR + name
 					+ FILE_SUFFIX;
 		}
 		return path;
+	}
+	
+	/**
+	 * 获取.amr文件名
+	 * @param path
+	 * @return
+	 */
+	public static String getAmrFileName(String path){
+		return getFileName(path, FILE_SUFFIX);
+	}
+	
+	/**
+	 * 获取文件名
+	 * @param path
+	 * @return
+	 */
+	public static String getFileName(String path, String suffix){
+		String name = "";
+		int index = path.lastIndexOf(CommonUtil.PATH_SEPARATOR);
+		name = path.substring(index+1).replace(suffix, "");
+		return name;
 	}
 
 	/**

@@ -7,6 +7,7 @@ import java.util.List;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -32,10 +33,10 @@ import android.widget.Toast;
 
 import com.jimmy.im.server.adapter.ChatMsgViewAdapter;
 import com.jimmy.im.server.data.MsgEntity;
-import com.jimmy.im.server.data.MsgQueueManager;
 import com.jimmy.im.server.data.TextMsgEntity;
 import com.jimmy.im.server.data.VoiceMsgEntity;
-import com.jimmy.im.server.media.MediaRecord;
+import com.jimmy.im.server.media.MediaPlay.OnPlayCallbackListener;
+import com.jimmy.im.server.media.MediaWrapper;
 import com.jimmy.im.server.socket.MsgParam;
 import com.jimmy.im.server.socket.MsgRequest;
 import com.jimmy.im.server.socket.RequestQueueManager;
@@ -136,7 +137,7 @@ public class MainActivity extends Activity implements OnClickListener {
 					}
 					startVoiceT = System.currentTimeMillis();
 					voiceName = startVoiceT + "";
-						MediaRecord.getInstance().start(voiceName);
+					MediaWrapper.getInstance().startRecord();
 					break;
 				case MotionEvent.ACTION_UP:
 					Log.i(TAG, "onTouch() -> ACTION_UP");
@@ -144,8 +145,8 @@ public class MainActivity extends Activity implements OnClickListener {
 						return false;
 					}
 					endVoiceT = System.currentTimeMillis();
-//					stop();
-					MediaRecord.getInstance().stop();
+					
+					MediaWrapper.getInstance().stopRecord();
 					
 					int time = (int) ((endVoiceT - startVoiceT) / 1000);
 					Log.i(TAG, "onTouchEvent() -> recorder time: " + time + "s");
@@ -155,24 +156,29 @@ public class MainActivity extends Activity implements OnClickListener {
 								Toast.LENGTH_LONG).show();
 						return false;
 					}
-					VoiceMsgEntity entity = new VoiceMsgEntity();
-					entity.date = CommonUtil.getDate();
-					entity.userName = "Rose";
-					entity.isSelf = true;
-					entity.time = time;
-					entity.fileName = voiceName;
-					entity.filePath = CommonUtil.getAmrFilePath(voiceName);
 					
-					Message msg = mHandler.obtainMessage();
-					msg.obj = entity;
-					mHandler.sendMessage(msg);
+					String recordPath = MediaWrapper.getInstance().getRecordFilePath();
 					
-//					EventBus.getDefault().postSticky(entity);
-//					MsgQueueManager.getInstance().push(entity);
+					if(!TextUtils.isEmpty(recordPath)){
+						
+						VoiceMsgEntity entity = new VoiceMsgEntity();
+						entity.date = CommonUtil.getDate();
+						entity.userName = "Rose";
+						entity.isSelf = true;
+						entity.time = time;
+						entity.filePath = recordPath;
+						entity.fileName = CommonUtil.getAmrFileName(recordPath);
+						
+						Message msg = mHandler.obtainMessage();
+						msg.obj = entity;
+						mHandler.sendMessage(msg);
+						
+						
+						sendMsg(entity);
+						
+						voiceName = "";
+					}
 					
-					sendMsg(entity);
-					
-					voiceName = "";
 					break;
 
 				default:
@@ -210,10 +216,31 @@ public class MainActivity extends Activity implements OnClickListener {
 			mDataArrays.add(entity);
 		}
 
-		mAdapter = new ChatMsgViewAdapter(this, mDataArrays);
+		mAdapter = new ChatMsgViewAdapter(this, mDataArrays,
+				new ChatMsgViewAdapter.OnPlayListener() {
+
+					public void onPlay(VoiceMsgEntity entity) {
+						if (entity != null
+								&& !TextUtils.isEmpty(entity.filePath)) {
+							MediaWrapper.getInstance().startPlay(
+									entity.filePath, callback);
+						}
+					}
+				});
 		mListView.setAdapter(mAdapter);
 
 	}
+
+	OnPlayCallbackListener callback = new OnPlayCallbackListener() {
+
+		public void onError(MediaPlayer mp) {
+
+		}
+
+		public void onComplete(MediaPlayer mp) {
+
+		}
+	};
 
 	public void onClick(View v) {
 		switch (v.getId()) {
@@ -302,15 +329,27 @@ public class MainActivity extends Activity implements OnClickListener {
 	@Override
 	protected void onStart() {
 		super.onStart();
-		
+
 		EventBus.getDefault().register(this);
 	}
-	
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+
+		MediaWrapper.getInstance().stopPlay();
+		MediaWrapper.getInstance().stopRecord();
+	}
+
 	@Override
 	protected void onStop() {
 		super.onStop();
-		
+
 		EventBus.getDefault().unregister(this);
+
+		MediaWrapper.getInstance().releasePlay();
+		MediaWrapper.getInstance().releaseRecord();
+
 	}
 	
 	/** 

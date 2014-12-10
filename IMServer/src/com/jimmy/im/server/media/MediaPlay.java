@@ -2,10 +2,10 @@ package com.jimmy.im.server.media;
 
 import java.io.IOException;
 
-import com.jimmy.im.server.util.CommonUtil;
-
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
+import android.media.MediaPlayer.OnErrorListener;
+import android.media.MediaPlayer.OnPreparedListener;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -18,24 +18,36 @@ import android.util.Log;
 public class MediaPlay {
 	private static final String TAG = MediaPlay.class.getSimpleName();
 	
+	private OnPlayCallbackListener mOnPlayCallbackListener;
 	private MediaPlayer mPlayer;
 	
-	private String source;
-	
-	public static final class AudioPlayHolder{
-		public static MediaPlay sINSTANCE = new MediaPlay();
+	public MediaPlay(){
+		init();
 	}
 	
-	private MediaPlay(){
+	public MediaPlay(OnPlayCallbackListener listener){
+		this.mOnPlayCallbackListener = listener;
+		init();
+	}
+	
+	private void init(){
 		mPlayer = new MediaPlayer();
+		mPlayer.setOnErrorListener(new OnErrorListener() {
+			
+			public boolean onError(MediaPlayer mp, int what, int extra) {
+				MediaPlay.this.onError(mp);
+				return true;
+			}
+		});
+		mPlayer.setOnCompletionListener(new OnCompletionListener() {
+			
+			public void onCompletion(MediaPlayer mp) {
+				MediaPlay.this.onComplete(mp);
+			}
+		});
 	}
 	
-	public static MediaPlay getInstance(){
-		return AudioPlayHolder.sINSTANCE;
-	}
-	
-	public void startPlay(String name){
-		this.source = CommonUtil.getAmrFilePath(name);;
+	protected void start(String source){
 		if(TextUtils.isEmpty(source)){
 			Log.i(TAG, "startPlay() -> source is null");
 			return;
@@ -46,13 +58,16 @@ public class MediaPlay {
 			}
 			mPlayer.reset();
 			mPlayer.setDataSource(source);
-			mPlayer.prepare();
-			mPlayer.start();
-			mPlayer.setOnCompletionListener(new OnCompletionListener() {
+//			mPlayer.prepare();
+//			mPlayer.start();
+			mPlayer.prepareAsync();
+			mPlayer.setOnPreparedListener(new OnPreparedListener() {
 				
-				public void onCompletion(MediaPlayer mp) {
+				public void onPrepared(MediaPlayer mp) {
+					mp.start();
 				}
 			});
+			
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 		} catch (SecurityException e) {
@@ -61,6 +76,61 @@ public class MediaPlay {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * 完成回调
+	 * @param mp
+	 */
+	private void onComplete(MediaPlayer mp){
+		if(mOnPlayCallbackListener != null){
+			mOnPlayCallbackListener.onComplete(mp);
+		}
+	}
+	
+	/**
+	 * 错误回调
+	 * @param mp
+	 */
+	private void onError(MediaPlayer mp){
+		if(mOnPlayCallbackListener != null){
+			mOnPlayCallbackListener.onError(mp);
+		}
+	}
+	
+	public interface OnPlayCallbackListener{
+		void onComplete(MediaPlayer mp);
+		
+		void onError(MediaPlayer mp);
+	}
+	
+	protected void setOnPlayCallbackListener(OnPlayCallbackListener listener){
+		this.mOnPlayCallbackListener = listener;
+	}
+	
+	protected void pause(){
+		if(mPlayer != null && mPlayer.isPlaying()){
+			mPlayer.pause();
+		}
+	}
+	
+	/**
+	 * 释放资源，推荐在Activity/Fragment onPause()方法中调用
+	 */
+	protected void stop(){
+		if(mPlayer != null && mPlayer.isPlaying()){
+			mPlayer.stop();
+		}
+	}
+	
+	/**
+	 * 释放资源，推荐在Activity/Fragment onStop()方法中调用
+	 */
+	protected void release(){
+		if(mPlayer != null){
+			mPlayer.release();
+			mPlayer = null;
 		}
 	}
 

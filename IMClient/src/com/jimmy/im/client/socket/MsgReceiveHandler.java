@@ -18,7 +18,6 @@ import com.jimmy.im.client.data.MsgEntity;
 import com.jimmy.im.client.data.TextMsgEntity;
 import com.jimmy.im.client.data.VoiceMsgEntity;
 import com.jimmy.im.client.util.CommonUtil;
-import com.jimmy.im.client.util.ToastUtil;
 
 import de.greenrobot.event.EventBus;
 

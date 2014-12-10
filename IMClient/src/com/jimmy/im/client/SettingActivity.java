@@ -1,7 +1,6 @@
 package com.jimmy.im.client;
 
 import com.jimmy.im.client.config.Config;
-import com.jimmy.im.client.socket.SocketManager;
 import com.jimmy.im.client.util.ToastUtil;
 
 import android.app.Activity;
